@@ -27,6 +27,7 @@ class _AddressScreenState extends State<AddressScreen> {
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   String _selectedProvince = '';
+  bool _isEditing = false;
 
   final List<String> _provinceOptions = [
     'Bahria Phase 1-4',
@@ -95,7 +96,13 @@ class _AddressScreenState extends State<AddressScreen> {
           await prefs.setString('address', _addressController.text);
           await prefs.setString('province', _selectedProvince);
 
-          Navigator.pop(context);
+          setState(() {
+            _isEditing = false; // Return to view mode after saving
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Address updated successfully!')),
+          );
         } catch (e) {
           print('Error saving address: $e');
           ScaffoldMessenger.of(context).showSnackBar(
@@ -109,77 +116,123 @@ class _AddressScreenState extends State<AddressScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Address'),
+        backgroundColor: Colors.transparent,
+        title: Text('Address', style: TextStyle(fontFamily: 'Kanit', fontSize: 22, letterSpacing: 0.5),),
+        actions: [
+
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0.w),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: _isEditing ? _buildEditForm() : _buildAddressView(),
+      ),
+    );
+  }
 
-              TextFormField(
-                controller: _postalCodeController,
-                decoration: InputDecoration(labelText: 'Postal Code'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter postal code';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _mobileController,
-                decoration: InputDecoration(labelText: 'Mobile Number'),
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter mobile number';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(labelText: 'Address'),
-                maxLines: 4,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter address';
-                  }
-                  return null;
-                },
-              ),
-              DropdownButtonFormField<String>(
-                value: _provinceOptions.contains(_selectedProvince) ? _selectedProvince : null,
-                items: _provinceOptions.map((province) {
-                  return DropdownMenuItem<String>(
-                    value: province,
-                    child: Text(province),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedProvince = value ?? '';
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: 'Area',
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0),
-                ),
-                isExpanded: true,
-              ),
-              SizedBox(height: 20.h),
-              ElevatedButton(
-                onPressed: _saveAddress,
-                child: Text('Save Address'),
-              ),
-            ],
-          ),
+  Widget _buildAddressView() {
+    return Card(
+      color: Colors.white,
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero, // This makes the border square
+      ),
+      child: ListTile(
+        title: Text(_addressController.text),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Mobile: ${_mobileController.text}'),
+            Text('Postal Code: ${_postalCodeController.text}'),
+            Text('Area: $_selectedProvince'),
+          ],
         ),
+        trailing: IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            setState(() {
+              _isEditing = true;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: _postalCodeController,
+            decoration: InputDecoration(labelText: 'Postal Code'),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter postal code';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _mobileController,
+            decoration: InputDecoration(labelText: 'Mobile Number'),
+            keyboardType: TextInputType.phone,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter mobile number';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _addressController,
+            decoration: InputDecoration(labelText: 'Address'),
+            maxLines: 4,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter address';
+              }
+              return null;
+            },
+          ),
+          DropdownButtonFormField<String>(
+            value: _provinceOptions.contains(_selectedProvince) ? _selectedProvince : null,
+            items: _provinceOptions.map((province) {
+              return DropdownMenuItem<String>(
+                value: province,
+                child: Text(province),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedProvince = value ?? '';
+              });
+            },
+            decoration: InputDecoration(
+              labelText: 'Area',
+              contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+            ),
+            isExpanded: true,
+          ),
+          SizedBox(height: 20.h),
+          ElevatedButton(
+            onPressed: () {
+              _saveAddress(); // Call the save address method
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue, // Set the button color
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            ),
+            child: Text(
+              'Save Changes',
+              style: TextStyle(fontSize: 16.sp, fontFamily: 'Kanit'),
+            ),
+          ),
+        ],
       ),
     );
   }
