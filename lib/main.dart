@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
               // accentColor: Colors.pink,
               inputDecorationTheme: const InputDecorationTheme(),
             ),
-            home: SplashScreen(),
+            home: MainScreen(),
             debugShowCheckedModeBanner: false,
           );
         },

@@ -51,8 +51,10 @@ class _AddressScreenState extends State<AddressScreen> {
       final prefs = await SharedPreferences.getInstance();
 
       setState(() {
-        _postalCodeController.text = prefs.getString('postalCode') ?? widget.postalCode;
-        _mobileController.text = prefs.getString('mobileNumber') ?? widget.mobileNumber;
+        _postalCodeController.text =
+            prefs.getString('postalCode') ?? widget.postalCode;
+        _mobileController.text =
+            prefs.getString('mobileNumber') ?? widget.mobileNumber;
         _addressController.text = prefs.getString('address') ?? widget.address;
         _selectedProvince = prefs.getString('province') ?? widget.province;
       });
@@ -66,8 +68,10 @@ class _AddressScreenState extends State<AddressScreen> {
         final data = addressDoc.data() as Map<String, dynamic>?;
 
         setState(() {
-          _postalCodeController.text = data?['Postal Code'] ?? _postalCodeController.text;
-          _mobileController.text = data?['Mobile Number'] ?? _mobileController.text;
+          _postalCodeController.text =
+              data?['Postal Code'] ?? _postalCodeController.text;
+          _mobileController.text =
+              data?['Mobile Number'] ?? _mobileController.text;
           _addressController.text = data?['Address'] ?? _addressController.text;
           _selectedProvince = data?['Area'] ?? _selectedProvince;
         });
@@ -119,10 +123,12 @@ class _AddressScreenState extends State<AddressScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text('Address', style: TextStyle(fontFamily: 'Kanit', fontSize: 22, letterSpacing: 0.5),),
-        actions: [
-
-        ],
+        title: Text(
+          'Address',
+          style:
+              TextStyle(fontFamily: 'Kanit', fontSize: 22, letterSpacing: 0.5),
+        ),
+        actions: [],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0.w),
@@ -132,107 +138,233 @@ class _AddressScreenState extends State<AddressScreen> {
   }
 
   Widget _buildAddressView() {
-    return Card(
-      color: Colors.white,
-      elevation: 1.5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero, // This makes the border square
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: 40.0.h, // Adjust vertical padding to move the card down
+        horizontal:
+            16.0.w, // Optional: Horizontal padding for spacing from edges
       ),
-      child: ListTile(
-        title: Text(_addressController.text),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Mobile: ${_mobileController.text}'),
-            Text('Postal Code: ${_postalCodeController.text}'),
-            Text('Area: $_selectedProvince'),
-          ],
+      child: Card(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(2.0), // Slightly rounded corners
         ),
-        trailing: IconButton(
-          icon: Icon(Icons.edit),
-          onPressed: () {
-            setState(() {
-              _isEditing = true;
-            });
-          },
+        elevation: 1.5,
+        child: SizedBox(
+          height: 120.h, // Set a fixed height for the Card
+          child: ListView(
+            padding: EdgeInsets.all(12.0.w), // Padding inside the ListView
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _addressController.text,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        SizedBox(height: 5.h), // Space between text elements
+                        Text(
+                          _mobileController.text,
+                          style: TextStyle(fontFamily: 'Montserrat'),
+                        ),
+                        Text(
+                          _selectedProvince,
+                          style: TextStyle(fontFamily: 'Montserrat'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blueGrey),
+                    onPressed: () {
+                      setState(() {
+                        _isEditing =
+                            true; // Toggle to edit mode when the icon is clicked
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildEditForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            controller: _postalCodeController,
-            decoration: InputDecoration(labelText: 'Postal Code'),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter postal code';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: _mobileController,
-            decoration: InputDecoration(labelText: 'Mobile Number'),
-            keyboardType: TextInputType.phone,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter mobile number';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: _addressController,
-            decoration: InputDecoration(labelText: 'Address'),
-            maxLines: 4,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter address';
-              }
-              return null;
-            },
-          ),
-          DropdownButtonFormField<String>(
-            value: _provinceOptions.contains(_selectedProvince) ? _selectedProvince : null,
-            items: _provinceOptions.map((province) {
-              return DropdownMenuItem<String>(
-                value: province,
-                child: Text(province),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedProvince = value ?? '';
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Area',
-              contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return SingleChildScrollView(
+      child: Container(
+        height: screenHeight * 0.7, // Adjust height to fit the screen if needed
+        padding: EdgeInsets.all(16.0.w), // Padding inside the Container
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(2.0), // Rounded corners
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 2,
+              offset: Offset(0, 2), // Shadow position
             ),
-            isExpanded: true,
-          ),
-          SizedBox(height: 20.h),
-          ElevatedButton(
-            onPressed: () {
-              _saveAddress(); // Call the save address method
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue, // Set the button color
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Save Button
+            SizedBox(height: 16.h), // Space between button and form fields
+
+            // Postal Code Field
+            TextFormField(
+              controller: _postalCodeController,
+              decoration: InputDecoration(
+                labelText: 'Postal Code',
+                labelStyle: TextStyle(color: Colors.grey[700]), // Label text color
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blueGrey), // Underline color
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blueGrey), // Underline color
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter postal code';
+                }
+                return null;
+              },
+              cursorColor: Colors.blueGrey, // Cursor color
+              style: TextStyle(fontFamily: 'Montserrat'), // Font family
             ),
-            child: Text(
-              'Save Changes',
-              style: TextStyle(fontSize: 16.sp, fontFamily: 'Kanit'),
+            SizedBox(height: 16.h), // Space between fields
+
+            // Mobile Number Field
+            TextFormField(
+              controller: _mobileController,
+              decoration: InputDecoration(
+                labelText: 'Mobile Number',
+                labelStyle: TextStyle(color: Colors.grey[700]), // Label text color
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blueGrey), // Underline color
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blueGrey), // Underline color
+                ),
+              ),
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter mobile number';
+                }
+                return null;
+              },
+              cursorColor: Colors.blueGrey, // Cursor color
+              style: TextStyle(fontFamily: 'Montserrat'), // Font family
             ),
-          ),
-        ],
+            SizedBox(height: 16.h), // Space between fields
+
+            // Address Field
+            TextFormField(
+              controller: _addressController,
+              decoration: InputDecoration(
+                labelText: 'Address',
+                labelStyle: TextStyle(color: Colors.grey[700]), // Label text color
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey), // Underline color
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey), // Underline color
+                ),
+              ),
+              maxLines: 3,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter address';
+                }
+                return null;
+              },
+              cursorColor: Colors.blueGrey, // Cursor color
+              style: TextStyle(fontFamily: 'Montserrat'), // Font family
+            ),
+            SizedBox(height: 16.h), // Space between fields
+
+            // Province Dropdown
+            DropdownButtonFormField<String>(
+              value: _provinceOptions.contains(_selectedProvince)
+                  ? _selectedProvince
+                  : null,
+              items: _provinceOptions.map((province) {
+                return DropdownMenuItem<String>(
+                  value: province,
+                  child: Text(
+                    province,
+                    style: TextStyle(fontFamily: 'Montserrat'),
+                    // Font family
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedProvince = value ?? '';
+                });
+              },
+              decoration: InputDecoration(
+
+                labelText: 'Area',
+                labelStyle: TextStyle(color: Colors.grey[700]), // Label text color
+
+                contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                fillColor: Colors.grey[600], // Background color of dropdown
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey), // Underline color
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey), // Underline color
+                ),
+              ),
+              isExpanded: true,
+            ),
+            SizedBox(height: 50.h), // Space below the dropdown
+
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveAddress,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFB3C6D1),
+                    padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                    elevation: 1.0,
+                  ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
